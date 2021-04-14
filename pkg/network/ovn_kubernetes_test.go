@@ -173,7 +173,7 @@ host-network-namespace="openshift-host-network"
 enable-egress-ip=true
 
 [gateway]
-mode=local
+mode=shared
 nodeport=true`,
 		},
 
@@ -196,7 +196,7 @@ no-hostsubnet-nodes="kubernetes.io/os=windows"
 enable-egress-ip=true
 
 [gateway]
-mode=local
+mode=shared
 nodeport=true
 
 [hybridoverlay]
@@ -227,7 +227,7 @@ no-hostsubnet-nodes="kubernetes.io/os=windows"
 enable-egress-ip=true
 
 [gateway]
-mode=local
+mode=shared
 nodeport=true
 
 [hybridoverlay]
@@ -261,7 +261,7 @@ no-hostsubnet-nodes="kubernetes.io/os=windows"
 enable-egress-ip=true
 
 [gateway]
-mode=local
+mode=shared
 nodeport=true
 
 [hybridoverlay]
@@ -380,6 +380,9 @@ func TestFillOVNKubernetesDefaults(t *testing.T) {
 					Destination:    "null",
 					SyslogFacility: "local0",
 				},
+				GatewayConfig: &operv1.GatewayConfig{
+					Mode: "shared",
+				},
 			},
 		},
 	}
@@ -420,6 +423,9 @@ func TestFillOVNKubernetesDefaultsIPsec(t *testing.T) {
 					MaxFileSize:    ptrToUint32(50),
 					Destination:    "null",
 					SyslogFacility: "local0",
+				},
+				GatewayConfig: &operv1.GatewayConfig{
+					Mode: "shared",
 				},
 			},
 		},

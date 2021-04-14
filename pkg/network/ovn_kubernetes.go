@@ -31,15 +31,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const OVN_NB_PORT = "9641"
-const OVN_SB_PORT = "9642"
-const OVN_NB_RAFT_PORT = "9643"
-const OVN_SB_RAFT_PORT = "9644"
 const CLUSTER_CONFIG_NAME = "cluster-config-v1"
 const CLUSTER_CONFIG_NAMESPACE = "kube-system"
 const OVN_CERT_CN = "ovn"
 const OVN_MASTER_DISCOVERY_POLL = 5
 const OVN_MASTER_DISCOVERY_BACKOFF = 120
+const OVN_NB_PORT = "9641"
+const OVN_SB_PORT = "9642"
+const OVN_NB_RAFT_PORT = "9643"
+const OVN_SB_RAFT_PORT = "9644"
 
 var OVN_MASTER_DISCOVERY_TIMEOUT = 250
 
@@ -67,6 +67,7 @@ func renderOVNKubernetes(conf *operv1.NetworkSpec, bootstrapResult *bootstrap.Bo
 	data.Data["GenevePort"] = c.GenevePort
 	data.Data["CNIConfDir"] = pluginCNIConfDir(conf)
 	data.Data["CNIBinDir"] = CNIBinDir
+	data.Data["OVN_GATEWAY_MODE"] = c.GatewayConfig.Mode
 	data.Data["OVN_NB_PORT"] = OVN_NB_PORT
 	data.Data["OVN_SB_PORT"] = OVN_SB_PORT
 	data.Data["OVN_NB_RAFT_PORT"] = OVN_NB_RAFT_PORT
@@ -269,6 +270,9 @@ func isOVNKubernetesChangeSafe(prev, next *operv1.NetworkSpec) []error {
 	nn := next.DefaultNetwork.OVNKubernetesConfig
 	errs := []error{}
 
+	if !reflect.DeepEqual(pn.GatewayConfig.Mode, nn.GatewayConfig.Mode) {
+		errs = append(errs, errors.Errorf("cannot change ovn-kubernetes Gateway Mode"))
+	}
 	if !reflect.DeepEqual(pn.MTU, nn.MTU) {
 		errs = append(errs, errors.Errorf("cannot change ovn-kubernetes MTU"))
 	}
@@ -321,6 +325,7 @@ func fillOVNKubernetesDefaults(conf, previous *operv1.NetworkSpec, hostMTU int) 
 		}
 		sc.MTU = &mtu
 	}
+
 	if sc.GenevePort == nil {
 		var geneve uint32 = uint32(6081)
 		sc.GenevePort = &geneve

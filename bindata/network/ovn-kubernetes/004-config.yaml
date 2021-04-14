@@ -25,7 +25,7 @@ data:
     enable-egress-ip=true
 
     [gateway]
-    mode=local
+    mode={{.OVN_GATEWAY_MODE}}
     nodeport=true
 {{ if .OVNHybridOverlayEnable }}
     [hybridoverlay]
